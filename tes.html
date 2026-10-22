@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuis Interaktif AGD Master: 20 Kasus Klinis Asam-Basa (Biokimia FKUI)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-dark: #1e3a8a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --error: #dc2626;
+      --border: #cbd5e1;
+      --accent: #dbeafe;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 820px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    .header-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background-color: var(--accent);
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .reading-content {
+      line-height: 1.7;
+      font-size: 0.98rem;
+      color: #334155;
+    }
+
+    .highlight-box {
+      background-color: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+    }
+
+    .formula-box {
+      background-color: #eff6ff;
+      border: 1px dashed var(--primary);
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin: 14px 0;
+    }
+
+    .quiz-container {
+      display: none;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #f1f5f9;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected-correct {
+      background-color: #dcfce7;
+      border-color: var(--success);
+      color: #14532d;
+    }
+
+    .option-btn.selected-wrong {
+      background-color: #fee2e2;
+      border-color: var(--error);
+      color: #7f1d1d;
+    }
+
+    .explanation {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .explanation.correct {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .explanation.wrong {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .btn-action {
+      margin-top: 24px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background-color: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- MATERI AWAL -->
+    <div id="reading-view">
+      <div class="header-badge">PANDUAN PRAKTIS ANALISIS AGD</div>
+      <div class="title">Algoritma 3-Langkah Menentukan Diagnosis AGD</div>
+      <div class="reading-content">
+        <p>Sebelum memulai 20 kasus klinis, gunakan panduan praktis 3 langkah ini untuk menentukan diagnosis secara cepat dan tepat:</p>
+        
+        <div class="formula-box">
+          <strong>Nilai Rujukan Normal AGD:</strong><br>
+          • pH : 7,35 – 7,45 (Titik tengah = 7,40)<br>
+          • pCO₂ : 35 – 45 mmHg (Indikator Respiratorik / Asam)<br>
+          • HCO₃⁻ : 22 – 26 mEq/L (Indikator Metabolik / Basa)
+        </div>
+
+        <div class="highlight-box">
+          <strong>LANGKAH 1: Cek Status pH (Gangguan Asama-Basa Utama)</strong><br>
+          • pH &lt; 7,35 = <strong>Asidosis</strong><br>
+          • pH &gt; 7,45 = <strong>Alkalosis</strong><br>
+          • pH 7,35 – 7,45 = <strong>Normal Murni</strong> ATAU <strong>Terkompensasi Sempurna</strong> (Jika pH &lt; 7,40 berarti kecenderungan Asidosis; jika pH &gt; 7,40 berarti kecenderungan Alkalosis).
+        </div>
+
+        <div class="highlight-box">
+          <strong>LANGKAH 2: Tentukan Penyebab Primer (Respiratorik vs Metabolik)</strong><br>
+          • Cari nilai yang <em>searah/konsisten</em> dengan kondisi pH di Langkah 1:<br>
+          - Asidosis + pCO₂ &gt; 45 (tinggi) = <strong>Asidosis Respiratorik</strong><br>
+          - Asidosis + HCO₃⁻ &lt; 22 (rendah) = <strong>Asidosis Metabolik</strong><br>
+          - Alkalosis + pCO₂ &lt; 35 (rendah) = <strong>Alkalosis Respiratorik</strong><br>
+          - Alkalosis + HCO₃⁻ &gt; 26 (tinggi) = <strong>Alkalosis Metabolik</strong>
+        </div>
+
+        <div class="highlight-box">
+          <strong>LANGKAH 3: Tentukan Status Kompensasi Organ Lawan</strong><br>
+          • <strong>Belum Terkompensasi (Uncompensated):</strong> Organ lawan nilainya masih NORMAL.<br>
+          • <strong>Terkompensasi Sebagian (Partially Compensated):</strong> Organ lawan sudah bergerak ABNORMAL untuk menyeimbangkan, tetapi pH MASIH ABNORMAL (&lt;7,35 atau &gt;7,45).<br>
+          • <strong>Terkompensasi Sempurna (Fully Compensated):</strong> Organ lawan ABNORMAL dan pH SUDAH KEMBALI NORMAL (7,35 - 7,45).
+        </div>
+      </div>
+      <button class="btn-action" onclick="startQuiz()">Mulai Kuis 20 Soal Kasus Klinis</button>
+    </div>
+
+    <!-- KUIS -->
+    <div id="quiz-view" class="quiz-container">
+      <div class="progress-info">
+        <span id="question-count">Soal 1 dari 20</span>
+        <span id="score-counter">Skor: 0</span>
+      </div>
+      <div class="header-badge" id="quiz-badge">KASUS KLINIS 1</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options-container"></div>
+      <div class="explanation" id="explanation-box"></div>
+      <button class="btn-action" id="next-quiz-btn" style="display: none;" onclick="nextQuestion()">Soal Berikutnya</button>
+    </div>
+
+    <!-- HASIL AKHIR -->
+    <div id="result-view" class="quiz-container" style="text-align: center;">
+      <div class="header-badge">EVALUASI KUIS SELESAI</div>
+      <div class="title">Hasil Master Analisis Gas Darah (AGD)</div>
+      <div style="font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 16px 0;" id="final-score">0 / 20</div>
+      <p style="color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;" id="final-desc"></p>
+      <button class="btn-action" onclick="restartQuiz()">Ulangi Kuis Dari Awal</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        caseTitle: "KASUS 1: Ketoasidosis Diabetikum (DKA)",
+        question: "Laki-laki 24 tahun dengan riwayat DM tipe 1 dibawa ke IGD dalam keadaan somnolen dan pernapasan cepat dan dalam (Kussmaul). Hasil AGD: pH 7,21 ; pCO₂ 26 mmHg ; HCO₃⁻ 11 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,21 (<7,35) = Asidosis.<br>2. HCO₃⁻ 11 (<22) = Metabolik.<br>3. pCO₂ 26 (<35) = Paru merespon hiperventilasi. Karena pH masih <7,35, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 2: PPOK Eksaserbasi Akut",
+        question: "Laki-laki 62 tahun perokok berat dengan PPOK mengalami sesak berat. Hasil AGD: pH 7,24 ; pCO₂ 62 mmHg ; HCO₃⁻ 25 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Respiratorik Terkompensasi Sempurna",
+          "Asidosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,24 (<7,35) = Asidosis.<br>2. pCO₂ 62 (>45) = Respiratorik.<br>3. HCO₃⁻ 25 (22-26) = Masih Normal (ginjal belum sempat berkompensasi). Statusnya **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 3: Serangan Ansietas / Histeris",
+        question: "Wanita 21 tahun dibawa ke IGD karena napas sangat cepat (hiperventilasi) setelah mengalami stres berat. Hasil AGD: pH 7,54 ; pCO₂ 22 mmHg ; HCO₃⁻ 23 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Respiratorik Belum Terkompensasi",
+          "Alkalosis Respiratorik Terkompensasi Sebagian",
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,54 (>7,45) = Alkalosis.<br>2. pCO₂ 22 (<35) = Respiratorik.<br>3. HCO₃⁻ 23 (Normal) = Ginjal belum merespon. Statusnya **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 4: Muntah Hebat (Prolonged Vomiting)",
+        question: "Wanita 30 tahun mengalami muntah-muntah hebat selama 3 hari akibat gastroenteritis. Hasil AGD: pH 7,51 ; pCO₂ 48 mmHg ; HCO₃⁻ 36 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Metabolik Belum Terkompensasi",
+          "Alkalosis Metabolik Terkompensasi Sebagian",
+          "Alkalosis Metabolik Terkompensasi Sempurna",
+          "Alkalosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,51 (>7,45) = Alkalosis.<br>2. HCO₃⁻ 36 (>26) = Metabolik (kehilangan asam HCl lambung).<br>3. pCO₂ 48 (>45) = Paru merespon hipoventilasi untuk menahan CO₂. Karena pH masih >7,45, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 5: PPOK Stabil Kronis",
+        question: "Laki-laki 68 tahun dengan PPOK kronis melakukan pemeriksaan rutin. Hasil AGD: pH 7,37 ; pCO₂ 56 mmHg ; HCO₃⁻ 32 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Terkompensasi Sempurna"
+        ],
+        answer: 2,
+        explanation: "1. pH 7,37 = Normal (condong asidosis <7,40).<br>2. pCO₂ 56 (>45) = Asidosis Respiratorik.<br>3. HCO₃⁻ 32 (>26) = Ginjal menahan bikarbonat. Karena pH sudah kembali ke rentang normal (7,35-7,45), statusnya **Terkompensasi Sempurna**."
+      },
+      {
+        caseTitle: "KASUS 6: Diare Berat",
+        question: "Anak 5 tahun mengalami diare profus selama 2 hari. Hasil AGD: pH 7,28 ; pCO₂ 39 mmHg ; HCO₃⁻ 15 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,28 (<7,35) = Asidosis.<br>2. HCO₃⁻ 15 (<22) = Metabolik (kehilangan HCO₃⁻ via pencernaan).<br>3. pCO₂ 39 (Normal) = Paru belum merespon. Statusnya **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 7: Gagal Ginjal Kronis (GGK)",
+        question: "Laki-laki 55 tahun dengan GGK stadium akhir mengeluh mual dan lemas. Hasil AGD: pH 7,38 ; pCO₂ 28 mmHg ; HCO₃⁻ 16 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Asidosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,38 = Normal (condong asidosis <7,40).<br>2. HCO₃⁻ 16 (<22) = Asidosis Metabolik.<br>3. pCO₂ 28 (<35) = Paru merespon hiperventilasi. Karena pH sudah normal, statusnya **Terkompensasi Sempurna**."
+      },
+      {
+        caseTitle: "KASUS 8: Overdosis Morfin / Opioid",
+        question: "Laki-laki 28 tahun dibawa ke IGD akibat overdosis morfin. Frekuensi napas 8x/menit. Hasil AGD: pH 7,18 ; pCO₂ 68 mmHg ; HCO₃⁻ 24 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sempurna"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,18 (<7,35) = Asidosis.<br>2. pCO₂ 68 (>45) = Respiratorik (depresi napas).<br>3. HCO₃⁻ 24 (Normal) = Ginjal belum merespon. Statusnya **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 9: Penyelam Dataran Tinggi (High Altitude)",
+        question: "Pendaki gunung di ketinggian 4000 mdpl mengalami hiperventilasi akibat hipoksia. Hasil AGD setelah 3 hari: pH 7,42 ; pCO₂ 28 mmHg ; HCO₃⁻ 18 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Alkalosis Respiratorik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,42 = Normal (condong alkalosis >7,40).<br>2. pCO₂ 28 (<35) = Alkalosis Respiratorik.<br>3. HCO₃⁻ 18 (<22) = Ginjal membuang bikarbonat. Karena pH sudah normal, statusnya **Terkompensasi Sempurna**."
+      },
+      {
+        caseTitle: "KASUS 10: Konsumsi Antasida Berlebihan",
+        question: "Pasien ulkus peptikum mengonsumsi natrium bikarbonat dosis tinggi secara mandiri. Hasil AGD: pH 7,48 ; pCO₂ 42 mmHg ; HCO₃⁻ 31 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Metabolik Belum Terkompensasi",
+          "Alkalosis Metabolik Terkompensasi Sebagian",
+          "Alkalosis Metabolik Terkompensasi Sempurna",
+          "Alkalosis Respiratorik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,48 (>7,45) = Alkalosis.<br>2. HCO₃⁻ 31 (>26) = Metabolik.<br>3. pCO₂ 42 (Normal) = Paru belum merespon. Statusnya **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 11: Trauma Dada / Flail Chest",
+        question: "Pasien kecelakaan lalu lintas mengalami fraktur kosta multipel. Hasil AGD: pH 7,26 ; pCO₂ 55 mmHg ; HCO₃⁻ 24 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sempurna"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,26 (<7,35) = Asidosis.<br>2. pCO₂ 55 (>45) = Respiratorik (hipoventilasi akibat nyeri dinding dada).<br>3. HCO₃⁻ 24 (Normal) = Status **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 12: Asidosis Laktat Pasca Henti Jantung",
+        question: "Pasien pasca resusitasi jantung paru mengalami hipoksia jaringan berat. Hasil AGD: pH 7,15 ; pCO₂ 32 mmHg ; HCO₃⁻ 10 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,15 (<7,35) = Asidosis.<br>2. HCO₃⁻ 10 (<22) = Metabolik (Asam laktat naik).<br>3. pCO₂ 32 (<35) = Paru merespon hiperventilasi. Karena pH masih <7,35, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 13: Sindrom Cushing / Kelebihan Aldosteron",
+        question: "Pasien dengan sindrom Cushing mengalami retensi bikarbonat dan hipokalemia. Hasil AGD: pH 7,49 ; pCO₂ 49 mmHg ; HCO₃⁻ 35 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Metabolik Belum Terkompensasi",
+          "Alkalosis Metabolik Terkompensasi Sebagian",
+          "Alkalosis Metabolik Terkompensasi Sempurna",
+          "Alkalosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,49 (>7,45) = Alkalosis.<br>2. HCO₃⁻ 35 (>26) = Metabolik.<br>3. pCO₂ 49 (>45) = Paru melakukan hipoventilasi. Karena pH masih >7,45, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 14: Asma Bronkial Akut Berat",
+        question: "Anak 10 tahun mengalami serangan asma berat dengan kelelahan otot napas. Hasil AGD: pH 7,22 ; pCO₂ 58 mmHg ; HCO₃⁻ 23 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Respiratorik Terkompensasi Sempurna",
+          "Asidosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,22 (<7,35) = Asidosis.<br>2. pCO₂ 58 (>45) = Respiratorik.<br>3. HCO₃⁻ 23 (Normal) = Status **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 15: Pasien Terapi Diuretik Furosemid Kronis",
+        question: "Pasien gagal jantung mengonsumsi Furosemid dosis tinggi. Hasil AGD: pH 7,43 ; pCO₂ 49 mmHg ; HCO₃⁻ 32 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Metabolik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Terkompensasi Sebagian",
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,43 = Normal (condong alkalosis >7,40).<br>2. HCO₃⁻ 32 (>26) = Alkalosis Metabolik.<br>3. pCO₂ 49 (>45) = Paru menahan CO₂. Karena pH sudah normal, statusnya **Terkompensasi Sempurna**."
+      },
+      {
+        caseTitle: "KASUS 16: Demam Tinggi & Sepsis Awal",
+        question: "Pasien sepsis mengalami hiperventilasi akibat stimulasi pusat napas oleh racun/demam. Hasil AGD: pH 7,52 ; pCO₂ 26 mmHg ; HCO₃⁻ 21 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Respiratorik Belum Terkompensasi",
+          "Alkalosis Respiratorik Terkompensasi Sebagian",
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,52 (>7,45) = Alkalosis.<br>2. pCO₂ 26 (<35) = Respiratorik.<br>3. HCO₃⁻ 21 (<22) = Ginjal mulai membuang bikarbonat. Karena pH masih >7,45, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 17: Kelaparan Berkepanjangan (Starvation)",
+        question: "Pasien anorexia nervosa mengalami pembentukan benda keton berlebih. Hasil AGD: pH 7,29 ; pCO₂ 31 mmHg ; HCO₃⁻ 15 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,29 (<7,35) = Asidosis.<br>2. HCO₃⁻ 15 (<22) = Metabolik.<br>3. pCO₂ 31 (<35) = Paru kompensasi hiperventilasi. Karena pH belum normal, statusnya **Terkompensasi Sebagian**."
+      },
+      {
+        caseTitle: "KASUS 18: Kelemahan Otot Napas (Myasthenia Gravis)",
+        question: "Pasien Myasthenia Gravis mengalami krisis krisis respirasi. Hasil AGD: pH 7,36 ; pCO₂ 52 mmHg ; HCO₃⁻ 29 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Respiratorik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Terkompensasi Sebagian",
+          "Asidosis Respiratorik Belum Terkompensasi",
+          "Alkalosis Metabolik Terkompensasi Sempurna"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,36 = Normal (condong asidosis <7,40).<br>2. pCO₂ 52 (>45) = Asidosis Respiratorik.<br>3. HCO₃⁻ 29 (>26) = Ginjal kompensasi menahan HCO₃⁻. Karena pH sudah normal, statusnya **Terkompensasi Sempurna**."
+      },
+      {
+        caseTitle: "KASUS 19: Keracunan Salisilat / Aspirin Fase Awal",
+        question: "Pasien terintoksikasi Aspirin merangsang langsung pusat pernapasan otak. Hasil AGD: pH 7,53 ; pCO₂ 20 mmHg ; HCO₃⁻ 24 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Alkalosis Respiratorik Belum Terkompensasi",
+          "Alkalosis Respiratorik Terkompensasi Sebagian",
+          "Alkalosis Respiratorik Terkompensasi Sempurna",
+          "Alkalosis Metabolik Belum Terkompensasi"
+        ],
+        answer: 0,
+        explanation: "1. pH 7,53 (>7,45) = Alkalosis.<br>2. pCO₂ 20 (<35) = Respiratorik.<br>3. HCO₃⁻ 24 (Normal) = Status **Belum Terkompensasi**."
+      },
+      {
+        caseTitle: "KASUS 20: Renal Tubular Acidosis (RTA)",
+        question: "Pasien dengan Renal Tubular Acidosis gagal mereabsorpsi bikarbonat di tubulus proksimal. Hasil AGD: pH 7,25 ; pCO₂ 29 mmHg ; HCO₃⁻ 12 mEq/L. Diagnosis AGD lengkap adalah:",
+        options: [
+          "Asidosis Metabolik Belum Terkompensasi",
+          "Asidosis Metabolik Terkompensasi Sebagian",
+          "Asidosis Metabolik Terkompensasi Sempurna",
+          "Asidosis Respiratorik Terkompensasi Sebagian"
+        ],
+        answer: 1,
+        explanation: "1. pH 7,25 (<7,35) = Asidosis.<br>2. HCO₃⁻ 12 (<22) = Metabolik.<br>3. pCO₂ 29 (<35) = Paru merespon hiperventilasi. Karena pH masih <7,35, statusnya **Terkompensasi Sebagian**."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function startQuiz() {
+      document.getElementById("reading-view").style.display = "none";
+      document.getElementById("quiz-view").style.display = "block";
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("quiz-badge").innerText = q.caseTitle;
+      document.getElementById("question-text").innerHTML = `${currentQuestion + 1}. ${q.question}`;
+      document.getElementById("question-count").innerText = `Soal ${currentQuestion + 1} dari ${questions.length}`;
+      document.getElementById("score-counter").innerText = `Skor: ${score}`;
+
+      const optionsContainer = document.getElementById("options-container");
+      optionsContainer.innerHTML = "";
+
+      document.getElementById("explanation-box").style.display = "none";
+      document.getElementById("next-quiz-btn").style.display = "none";
+
+      const progressPercent = (currentQuestion / questions.length) * 100;
+      document.getElementById("progress-fill").style.width = `${progressPercent}%`;
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}`;
+        btn.onclick = () => selectOption(idx);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectOption(selectedIndex) {
+      const q = questions[currentQuestion];
+      const buttons = document.querySelectorAll("#options-container .option-btn");
+
+      buttons.forEach(btn => btn.disabled = true);
+
+      const expBox = document.getElementById("explanation-box");
+      expBox.style.display = "block";
+
+      if (selectedIndex === q.answer) {
+        score++;
+        buttons[selectedIndex].classList.add("selected-correct");
+        expBox.className = "explanation correct";
+        expBox.innerHTML = `<strong>Jawaban Benar!</strong><br>${q.explanation}`;
+      } else {
+        buttons[selectedIndex].classList.add("selected-wrong");
+        buttons[q.answer].classList.add("selected-correct");
+        expBox.className = "explanation wrong";
+        expBox.innerHTML = `<strong>Jawaban Kurang Tepat!</strong><br>${q.explanation}`;
+      }
+
+      document.getElementById("score-counter").innerText = `Skor: ${score}`;
+      document.getElementById("next-quiz-btn").style.display = "block";
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showFinalResults();
+      }
+    }
+
+    function showFinalResults() {
+      document.getElementById("quiz-view").style.display = "none";
+      document.getElementById("result-view").style.display = "block";
+
+      document.getElementById("final-score").innerText = `${score} / ${questions.length}`;
+      
+      const percentage = (score / questions.length) * 100;
+      const desc = document.getElementById("final-desc");
+
+      if (percentage >= 80) {
+        desc.innerHTML = `<strong>Luar Biasa! (Skor: ${percentage}%)</strong><br>Kamu sudah sangat mahir membedakan mana Asidosis/Alkalosis, Respiratorik/Metabolik, serta status kompensasi Belum/Sebagian/Sempurna!`;
+      } else {
+        desc.innerHTML = `<strong>Perlu Reviu (Skor: ${percentage}%)</strong><br>Coba perhatikan lagi tabel kompensasi dan patokan pH 7,35 - 7,45, lalu ulangi kuis ini!`;
+      }
+
+      document.getElementById("progress-fill").style.width = `100%`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("quiz-view").style.display = "block";
+      document.getElementById("result-view").style.display = "none";
+      loadQuestion();
+    }
+  </script>
+</body>
+</html>
